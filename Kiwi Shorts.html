@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kiwi Shorts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --stage: #0d0f0b;
+    --ui: #ffffff;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); height: 100%; }
+  *, *::before, *::after { box-sizing: inherit; }
+  body {
+    margin: 0; height: 100%;
+    background: var(--stage);
+    font-family: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+    display: flex; justify-content: center; overflow: hidden;
+  }
+  .phone {
+    position: relative; width: 100%; max-width: 440px; height: 100%;
+    background: #000; overflow: hidden;
+  }
+  @media (min-width: 560px) {
+    .phone { height: min(100%, 860px); margin: auto; border-radius: 28px; }
+    body { align-items: center; }
+  }
+  .feed {
+    height: 100%; overflow-y: scroll; scroll-snap-type: y mandatory;
+    scrollbar-width: none; overscroll-behavior: contain;
+  }
+  .feed::-webkit-scrollbar { display: none; }
+  .card {
+    position: relative; height: 100%; scroll-snap-align: start; scroll-snap-stop: always;
+    background: var(--bg); color: var(--fg);
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 0 20px 28px 20px; overflow: hidden;
+  }
+  .art {
+    position: absolute; left: 0; right: 0; top: 9%; height: 46%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .art svg { width: 86%; height: 100%; overflow: visible; }
+  .card.on .art svg { animation: bob 3.2s ease-in-out infinite; }
+  @keyframes bob { 0%,100% { transform: translateY(0) rotate(-1deg);} 50% { transform: translateY(-8px) rotate(1.5deg);} }
+
+  .copy { position: relative; z-index: 2; padding-right: 64px; }
+  .hook {
+    font-weight: 800; font-size: clamp(30px, 8.6vw, 40px); line-height: 1.02;
+    letter-spacing: -0.02em; margin: 0 0 12px; text-wrap: balance;
+  }
+  .fact {
+    font-weight: 500; font-size: 17px; line-height: 1.38; margin: 0 0 16px;
+    max-width: 34ch; opacity: .94;
+  }
+  .by { font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+  .by i { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); display: inline-block; border: 2px solid var(--fg); }
+
+  .rail {
+    position: absolute; right: 10px; bottom: 30px; z-index: 5;
+    display: flex; flex-direction: column; gap: 18px; align-items: center;
+  }
+  .rail button {
+    background: none; border: 0; color: var(--fg); font: inherit; font-size: 12px; font-weight: 800;
+    display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 4px;
+  }
+  .rail .ico {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: rgba(255,255,255,.2); backdrop-filter: blur(6px);
+    display: grid; place-items: center; transition: transform .15s;
+  }
+  .rail button:active .ico { transform: scale(.88); }
+  .rail svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .rail .liked svg { fill: #ff4d6d; stroke: #ff4d6d; }
+  .rail .liked .ico { animation: pop .35s ease-out; }
+  @keyframes pop { 50% { transform: scale(1.25);} }
+  .rail button:focus-visible, .nav button:focus-visible, .top button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; border-radius: 50%; }
+
+  .top {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 6;
+    padding: calc(env(safe-area-inset-top, 0px) + 12px) 16px 0; color: #fff;
+    pointer-events: none;
+  }
+  .bar { height: 3px; border-radius: 3px; background: rgba(255,255,255,.3); overflow: hidden; }
+  .bar b { display: block; height: 100%; width: 0; background: #fff; }
+  .brand { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-weight: 800; font-size: 18px; text-shadow: 0 1px 6px rgba(0,0,0,.3); }
+  .brand span:last-child { font-size: 13px; opacity: .9; }
+  .top button { pointer-events: auto; }
+  .auto {
+    background: rgba(0,0,0,.28); border: 0; color: #fff; font: inherit; font-weight: 800; font-size: 12px;
+    padding: 6px 10px; border-radius: 99px; cursor: pointer;
+  }
+
+  .nav { position: absolute; right: -64px; top: 50%; transform: translateY(-50%); display: none; flex-direction: column; gap: 12px; }
+  @media (min-width: 640px) { .nav { display: flex; } }
+  .nav button {
+    width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer;
+    background: #22261d; color: #fff; display: grid; place-items: center;
+  }
+  .nav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+  .toast {
+    position: absolute; left: 50%; bottom: 90px; transform: translate(-50%, 20px); z-index: 9;
+    background: #fff; color: #111; font-weight: 800; font-size: 14px; padding: 10px 16px; border-radius: 99px;
+    opacity: 0; transition: .25s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .hint {
+    position: absolute; left: 0; right: 0; top: 56%; z-index: 4; text-align: center; font-size: 13px; font-weight: 800;
+    color: var(--fg); opacity: 0; pointer-events: none;
+  }
+  .card.first.on .hint { animation: hint 3s 1s ease-in-out 1; }
+  @keyframes hint { 0%,100% { opacity: 0; } 30%,70% { opacity: .8; } }
+  .tag {
+    display: inline-block; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 99px;
+    margin-bottom: 10px; background: rgba(255,255,255,.22);
+    background: color-mix(in srgb, var(--fg) 16%, transparent);
+  }
+
+  /* ---- fake clip scenes ---- */
+  .clip-stage { position: relative; width: 86%; height: 100%; display: flex; align-items: flex-end; justify-content: center; }
+  .clip-stage svg { width: 100%; height: auto; animation: none !important; }
+  .clip-stage .b { position: relative; z-index: 2; width: 70%; transform-origin: 62% 94%; }
+  .bub {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 4;
+    background: #fff; color: #111; font-weight: 800; font-size: 15px; padding: 7px 13px;
+    border-radius: 14px; white-space: nowrap; opacity: 0;
+  }
+  .ground { position: absolute; left: -8%; right: -8%; bottom: 0; height: 8%; background: rgba(0,0,0,.28); border-radius: 8px; z-index: 1; }
+
+  .fly { animation: fly 4s ease-in-out infinite; }
+  @keyframes fly {
+    0% { transform: none; } 8% { transform: scale(1.05,.86); }
+    28% { transform: translateY(-95px) rotate(-6deg) scale(.98,1.04); }
+    48% { transform: translateY(-100px) rotate(-3deg); }
+    70% { transform: translateY(0) scale(1.07,.84); } 76% { transform: scale(.98,1.04); }
+    82%,100% { transform: none; }
+  }
+  .b1 { animation: showA 4s infinite; } .b2 { top: auto; bottom: 2%; font-size: 24px; background: #ffe27a; animation: showB 4s infinite; }
+  @keyframes showA { 0%,3% { opacity: 0; } 8%,40% { opacity: 1; } 48%,100% { opacity: 0; } }
+  @keyframes showB { 0%,68% { opacity: 0; } 72%,88% { opacity: 1; } 94%,100% { opacity: 0; } }
+
+  .peck { animation: peck 2.4s ease-in-out infinite; }
+  @keyframes peck {
+    0%,30% { transform: rotate(0); } 42% { transform: rotate(-9deg); } 50% { transform: rotate(-2deg); }
+    58% { transform: rotate(-9deg); } 66%,100% { transform: rotate(0); }
+  }
+  .worm { position: absolute; left: 15%; bottom: 3%; width: 13px; height: 46px; border-radius: 13px; background: #ff9aa8; transform-origin: bottom center; z-index: 0; animation: worm 2.4s ease-in-out infinite; }
+  @keyframes worm {
+    0%,20% { transform: translateY(54px); } 35% { transform: translateY(0) rotate(8deg); } 50% { transform: translateY(0) rotate(-8deg); }
+    60% { transform: translateY(0) rotate(6deg); } 68%,100% { transform: translateY(54px); }
+  }
+  .b3 { top: auto; bottom: 36%; left: 26%; animation: showC 2.4s infinite; }
+  @keyframes showC { 0%,64% { opacity: 0; } 70%,92% { opacity: 1; } 100% { opacity: 0; } }
+
+  .z { position: absolute; left: 32%; bottom: 55%; font-weight: 800; color: #fff; font-size: 28px; opacity: 0; animation: zup 3s linear infinite; z-index: 3; }
+  .z2 { animation-delay: 1s; font-size: 36px; } .z3 { animation-delay: 2s; font-size: 44px; }
+  @keyframes zup { 0% { transform: translate(0,0); opacity: 0; } 20% { opacity: 1; } 100% { transform: translate(34px,-90px); opacity: 0; } }
+  .clock { position: absolute; right: 4%; top: 8%; font-size: 46px; z-index: 3; animation: ring .22s ease-in-out infinite alternate; }
+  @keyframes ring { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
+  .b4 { top: auto; bottom: 62%; left: 32%; animation: showD 4s infinite; }
+  @keyframes showD { 0%,25% { opacity: 0; } 35%,85% { opacity: 1; } 95%,100% { opacity: 0; } }
+
+  .dance { animation: dance .5s ease-in-out infinite alternate; }
+  @keyframes dance { from { transform: rotate(-3deg) translateY(0); } to { transform: rotate(3deg) translateY(-6px); } }
+  .conf { position: absolute; top: -14px; width: 8px; height: 13px; z-index: 3; animation: fall 3.2s linear infinite; }
+  @keyframes fall { to { transform: translateY(420px) rotate(540deg); } }
+
+  .db { transform-box: fill-box; animation: curl 1.4s ease-in-out infinite; }
+  @keyframes curl { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-34px); } }
+  .sw { transform-box: fill-box; animation: sweat 1.4s ease-in infinite; opacity: 0; }
+  .sw.s2 { animation-delay: .55s; }
+  @keyframes sweat { 0% { transform: translateY(0); opacity: 0; } 30% { opacity: 1; } 100% { transform: translateY(28px); opacity: 0; } }
+
+  .meet .fv { width: 38%; position: relative; z-index: 2; animation: nerv .28s ease-in-out infinite alternate; }
+  .meet .b { width: 62%; }
+  .lean { animation: lean 3s ease-in-out infinite; }
+  @keyframes nerv { from { transform: translateX(-2px); } to { transform: translateX(2px); } }
+  @keyframes lean { 0%,15% { transform: none; } 55%,80% { transform: rotate(-6deg) translateX(-8px); } 100% { transform: none; } }
+  .q { position: absolute; left: 62%; top: 4%; font-size: 56px; font-weight: 800; z-index: 4; transform: scale(0); animation: qpop 3s ease-out infinite; }
+  @keyframes qpop { 0%,10% { transform: scale(0); } 25%,70% { transform: scale(1) rotate(8deg); } 85%,100% { transform: scale(0); } }
+  .b5 { left: 24%; animation: showE 3s infinite; }
+  @keyframes showE { 0%,50% { opacity: 0; } 58%,90% { opacity: 1; } 100% { opacity: 0; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .clip-stage *, .clip-stage { animation: none !important; }
+    .bub, .conf, .z, .q { display: none; }
+    .card.on .art svg, .card.first.on .hint, .rail .liked .ico { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="top">
+    <div class="bar"><b id="prog"></b></div>
+    <div class="brand"><span>Kiwi Shorts</span><button class="auto" id="autoBtn" aria-pressed="false">Autoplay: off</button></div>
+  </div>
+  <div class="feed" id="feed" tabindex="0" aria-label="Kiwi facts feed. Swipe or use arrow keys."></div>
+  <div class="nav">
+    <button id="up" aria-label="Previous short"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button>
+    <button id="down" aria-label="Next short"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+  </div>
+  <div class="toast" id="toast">Fact copied</div>
+</div>
+
+<script>
+/* ---------- Art ---------- */
+function bird(o) {
+  o = o || {};
+  var body = o.body || "#7a5233", dark = o.dark || "#4e3321", beak = o.beak || "#e8d9b0";
+  var eye = o.closed
+    ? '<path d="M86 104 q6 5 12 0" stroke="#1a1109" stroke-width="3.5" fill="none" stroke-linecap="round"/>'
+    : '<circle cx="92" cy="103" r="4.5" fill="#1a1109"/><circle cx="93.5" cy="101.5" r="1.4" fill="#fff"/>';
+  var feathers = "";
+  for (var i = 0; i < 16; i++) {
+    var x = 118 + (i % 4) * 22 + (Math.floor(i / 4) % 2) * 9, y = 118 + Math.floor(i / 4) * 18;
+    feathers += '<path d="M' + x + ' ' + y + ' q7 -9 15 -3" stroke="' + dark + '" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".55"/>';
+  }
+  return '<svg viewBox="0 0 300 240" aria-hidden="true">' +
+    '<ellipse cx="170" cy="222" rx="95" ry="9" fill="rgba(0,0,0,.18)"/>' +
+    '<path d="M153 190 v28 M143 219 h26 M193 192 v26 M183 219 h26" stroke="' + beak + '" stroke-width="7" stroke-linecap="round" fill="none"/>' +
+    '<ellipse cx="180" cy="148" rx="88" ry="66" fill="' + body + '"/>' + feathers +
+    '<ellipse cx="108" cy="112" rx="34" ry="28" fill="' + body + '"/>' +
+    '<path d="M86 114 L10 176 Q8 180 13 179 L92 128 Z" fill="' + beak + '"/>' +
+    '<circle cx="27" cy="165" r="2.2" fill="' + dark + '"/>' +
+    eye + '</svg>';
+}
+function fruit(o) {
+  o = o || {};
+  var seeds = "", rays = "";
+  for (var i = 0; i < 22; i++) {
+    var a = i / 22 * Math.PI * 2, r = 42;
+    seeds += '<ellipse cx="' + (150 + Math.cos(a) * r).toFixed(1) + '" cy="' + (120 + Math.sin(a) * r).toFixed(1) + '" rx="3" ry="6.5" fill="#15200e" transform="rotate(' + (a * 180 / Math.PI + 90).toFixed(0) + ' ' + (150 + Math.cos(a) * r).toFixed(1) + ' ' + (120 + Math.sin(a) * r).toFixed(1) + ')"/>';
+  }
+  for (var j = 0; j < 30; j++) {
+    var b = j / 30 * Math.PI * 2;
+    rays += '<line x1="' + (150 + Math.cos(b) * 28).toFixed(1) + '" y1="' + (120 + Math.sin(b) * 28).toFixed(1) + '" x2="' + (150 + Math.cos(b) * 78).toFixed(1) + '" y2="' + (120 + Math.sin(b) * 78).toFixed(1) + '" stroke="#b6e36a" stroke-width="1.6" opacity=".55"/>';
+  }
+  var g = o.gold ? ["#f2c53d", "#ffe58a"] : ["#6fb12f", "#a6d94d"];
+  return '<svg viewBox="0 0 300 240" aria-hidden="true">' +
+    '<ellipse cx="150" cy="226" rx="90" ry="8" fill="rgba(0,0,0,.18)"/>' +
+    '<circle cx="150" cy="120" r="102" fill="#7b5a37"/>' +
+    '<circle cx="150" cy="120" r="94" fill="' + g[0] + '"/>' +
+    '<circle cx="150" cy="120" r="80" fill="' + g[1] + '" opacity=".55"/>' + rays + seeds +
+    '<ellipse cx="150" cy="120" rx="24" ry="22" fill="#f6f3d4"/></svg>';
+}
+function egg() {
+  return '<svg viewBox="0 0 300 240" aria-hidden="true">' +
+    '<ellipse cx="150" cy="226" rx="80" ry="8" fill="rgba(0,0,0,.2)"/>' +
+    '<path d="M150 16 C226 16 252 112 238 168 C226 214 186 226 150 226 C114 226 74 214 62 168 C48 112 74 16 150 16Z" fill="#f4ecd2"/>' +
+    '<path d="M104 62 C92 90 88 120 94 150" stroke="#fff" stroke-width="9" stroke-linecap="round" fill="none" opacity=".6"/>' +
+    '<g transform="translate(168 150) scale(.42)" opacity=".92"><g transform="translate(-170 -140)">' +
+    '<ellipse cx="180" cy="148" rx="88" ry="66" fill="#c9b78f"/><ellipse cx="108" cy="112" rx="34" ry="28" fill="#c9b78f"/><path d="M86 114 L10 176 L92 128Z" fill="#c9b78f"/></g></g></svg>';
+}
+function moon(o) {
+  var stars = "";
+  var pts = [[30,30],[250,50],[60,150],[270,140],[210,20],[20,90]];
+  pts.forEach(function (p) { stars += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3" fill="#fff" opacity=".8"/>'; });
+  return '<div style="position:relative;width:86%;height:100%">' +
+    '<svg viewBox="0 0 300 240" style="position:absolute;inset:0;width:100%;height:100%" aria-hidden="true">' + stars +
+    '<circle cx="232" cy="52" r="34" fill="#f6efc4"/><circle cx="246" cy="44" r="30" fill="var(--bg)"/></svg>' +
+    '<div style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center"><div style="width:84%;height:84%">' + bird({ dark: "#3a2616" }) + '</div></div></div>';
+}
+function wing() {
+  return bird({ body: "#8a5d36", dark: "#45301f" }).replace('</svg>',
+    '<circle cx="208" cy="132" r="46" fill="none" stroke="#ffe27a" stroke-width="4" stroke-dasharray="7 8"/>' +
+    '<path d="M214 118 q-10 12 -3 26" stroke="#ffe27a" stroke-width="7" stroke-linecap="round" fill="none"/></svg>');
+}
+function nose() {
+  return bird({ body: "#7a5233" }).replace('</svg>',
+    '<circle cx="14" cy="177" r="15" fill="none" stroke="#fff" stroke-width="3.5"/>' +
+    '<circle cx="14" cy="177" r="3.2" fill="#fff"/>' +
+    '<path d="M-6 150 q-14 -8 0 -16 M-8 196 q-14 8 0 16" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/></svg>');
+}
+function bone() {
+  return '<svg viewBox="0 0 300 240" aria-hidden="true"><g transform="rotate(-24 150 120)">' +
+    '<rect x="40" y="96" width="220" height="48" rx="24" fill="#f4ecd2"/>' +
+    '<circle cx="48" cy="96" r="26" fill="#f4ecd2"/><circle cx="48" cy="144" r="26" fill="#f4ecd2"/>' +
+    '<circle cx="252" cy="96" r="26" fill="#f4ecd2"/><circle cx="252" cy="144" r="26" fill="#f4ecd2"/>' +
+    '<rect x="90" y="108" width="120" height="24" rx="12" fill="#e9737f"/></g></svg>';
+}
+function vines() {
+  return '<svg viewBox="0 0 300 240" aria-hidden="true">' +
+    '<path d="M150 236 C110 190 190 160 150 110 C115 70 175 50 150 8" stroke="#2f6b1f" stroke-width="9" fill="none" stroke-linecap="round"/>' +
+    '<path d="M150 190 q-50 -20 -62 -60 q46 4 62 60Z M152 120 q50 -10 70 -52 q-50 -2 -70 52Z" fill="#4f9a2a"/>' +
+    '<g transform="translate(70 170) scale(.28)">' + fruit().replace(/<\/?svg[^>]*>/g, "") + '</g>' +
+    '<g transform="translate(180 170) scale(.28)">' + fruit().replace(/<\/?svg[^>]*>/g, "") + '</g></svg>';
+}
+function jelly() {
+  return '<svg viewBox="0 0 300 240" aria-hidden="true">' +
+    '<ellipse cx="150" cy="226" rx="100" ry="8" fill="rgba(0,0,0,.18)"/>' +
+    '<path d="M70 120 h160 l-14 94 q-2 12 -14 12 h-104 q-12 0 -14 -12Z" fill="#ff6a8b"/>' +
+    '<ellipse cx="150" cy="120" rx="80" ry="16" fill="#ff93ab"/>' +
+    '<g transform="translate(112 74) scale(.2)">' + fruit().replace(/<\/?svg[^>]*>/g, "") + '</g>' +
+    '<path d="M118 150 l10 10 m-10 0 l10 -10 M170 170 l10 10 m-10 0 l10 -10" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".7"/></svg>';
+}
+function flag() {
+  return '<div style="width:86%;height:100%;display:flex;align-items:center;justify-content:center"><div style="width:62%">' +
+    bird({ body: "#2b3a2b", dark: "#16200f", beak: "#d9c9a0" }) + '</div></div>';
+}
+function shield() {
+  return bird({ body: "#7a5233" }).replace('</svg>',
+    '<g transform="translate(206 20)"><path d="M0 10 L32 0 L64 10 V44 C64 66 44 78 32 84 C20 78 0 66 0 44Z" fill="#ffe27a"/>' +
+    '<path d="M18 40 l10 10 l20 -22" stroke="#2b3a2b" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g></svg>');
+}
+function hair() {
+  return bird({ body: "#8b6a45", dark: "#3e2a18" }).replace('</svg>',
+    '<path d="M150 74 q4 -18 -2 -34 M168 72 q8 -18 2 -36 M186 76 q10 -16 8 -32 M204 84 q12 -12 14 -26" stroke="#8b6a45" stroke-width="4" fill="none" stroke-linecap="round"/></svg>');
+}
+
+/* ---------- Fake clips (animated scenes) ---------- */
+function stage(inner, cls) { return '<div class="clip-stage ' + (cls || '') + '">' + inner + '</div>'; }
+function bub(text, cls) { return '<div class="bub ' + cls + '">' + text + '</div>'; }
+
+function clipFly() {
+  return stage('<div class="b fly">' + bird() + '</div>' + bub('Any second now…', 'b1') + bub('THUD', 'b2'));
+}
+function clipWorm() {
+  return stage('<div class="worm"></div><div class="ground"></div><div class="b peck">' + bird() + '</div>' + bub('Nom.', 'b3'));
+}
+function clipSleep() {
+  return stage('<div class="b">' + bird({ closed: true }) + '</div><div class="z z1">Z</div><div class="z z2">Z</div><div class="z z3">Z</div><div class="clock">⏰</div>' + bub('Five more hours.', 'b4'));
+}
+function clipHat() {
+  var hat = '<g transform="rotate(-10 108 70)"><polygon points="90,92 126,92 108,44" fill="#ff4d6d"/><polygon points="98,78 118,78 114,66 102,66" fill="#ffe27a"/><circle cx="108" cy="43" r="6" fill="#fff"/></g>';
+  var conf = "", cols = ["#ff4d6d", "#ffe27a", "#4dd0e1", "#a6d94d", "#ffffff"];
+  for (var i = 0; i < 16; i++) conf += '<span class="conf" style="left:' + (4 + i * 6) + '%;background:' + cols[i % 5] + ';animation-delay:-' + ((i % 7) * 0.45).toFixed(2) + 's"></span>';
+  return stage(conf + '<div class="b dance">' + bird().replace('</svg>', hat + '</svg>') + '</div>');
+}
+function clipGym() {
+  var extra = '<path d="M78 94 Q108 70 140 96" stroke="#ff4d6d" stroke-width="7" fill="none" stroke-linecap="round"/>' +
+    '<g class="db"><rect x="150" y="160" width="56" height="7" rx="3" fill="#ddd"/>' +
+    '<rect x="144" y="146" width="12" height="35" rx="4" fill="#2a2a2a" stroke="#fff" stroke-width="2"/>' +
+    '<rect x="200" y="146" width="12" height="35" rx="4" fill="#2a2a2a" stroke="#fff" stroke-width="2"/></g>' +
+    '<circle class="sw s1" cx="152" cy="92" r="4" fill="#7fd4ff"/><circle class="sw s2" cx="146" cy="106" r="3.4" fill="#7fd4ff"/>';
+  return stage('<div class="b">' + bird().replace('</svg>', extra + '</svg>') + '</div>');
+}
+function clipMeet() {
+  return stage('<div class="fv">' + fruit() + '</div><div class="b lean">' + bird() + '</div><div class="q">?</div>' + bub('Cousin?', 'b5'), 'meet');
+}
+
+/* ---------- Content ---------- */
+var shorts = [
+  { hook: "Imagine laying this.", fact: "A kiwi egg can weigh up to about a fifth of the mother's own body weight. That's one of the biggest eggs for body size of any bird.", art: egg, bg: "#2f6fb0", fg: "#fff", accent: "#f4ecd2", likes: 4821 },
+  { hook: "Nostrils on the beak tip.", fact: "Kiwis have nostrils at the very end of their long beak, which almost no other bird does. They sniff out worms and grubs under the soil.", art: nose, bg: "#c2452d", fg: "#fff", accent: "#ffe27a", likes: 6203 },
+  { hook: "Not a morning bird.", fact: "Kiwis are nocturnal. They sleep in burrows or hollow logs all day, then come out after dark to forage.", art: moon, bg: "#17224d", fg: "#fff", accent: "#f6efc4", likes: 3390 },
+  { hook: "Wings? Technically.", fact: "A kiwi's wings are only a few centimetres long and hidden under shaggy feathers. Kiwis can't fly at all.", art: wing, bg: "#e0a526", fg: "#1c1405", accent: "#7a5233", likes: 5112 },
+  { hook: "Dad does the sitting.", fact: "In most kiwi species the male incubates the egg, sitting on it for around two to three months.", art: function () { return bird({ closed: true }); }, bg: "#2f7d57", fg: "#fff", accent: "#f4ecd2", likes: 2977 },
+  { hook: "Bones like a mammal.", fact: "Most birds have light, hollow bones. Kiwi bones are filled with marrow, which is closer to how mammal bones work.", art: bone, bg: "#6a3fa0", fg: "#fff", accent: "#e9737f", likes: 2204 },
+  { hook: "Feathers that look like fur.", fact: "Kiwi feathers are loose, shaggy and hair-like. Up close they look more like fur than the neat feathers of other birds.", art: hair, bg: "#d9cdb0", fg: "#2a1c0e", accent: "#8b6a45", likes: 3641 },
+  { hook: "Cousin: elephant bird.", fact: "DNA studies suggest the kiwi's closest relatives are the extinct elephant birds of Madagascar, not the moa that lived right next door in New Zealand.", art: function () { return bird({ body: "#6b6b50", dark: "#34341f" }); }, bg: "#ff7a45", fg: "#1f0d05", accent: "#fff", likes: 7450 },
+  { hook: "It had a different name.", fact: "Kiwifruit started out as the Chinese gooseberry. In 1959, New Zealand exporters renamed it after their national bird.", art: function () { return fruit(); }, bg: "#8ac43a", fg: "#10200a", accent: "#fff", likes: 8890 },
+  { hook: "Beats the orange.", fact: "Gram for gram, a green kiwifruit typically has more vitamin C than an orange.", art: function () { return fruit({ gold: true }); }, bg: "#f08a24", fg: "#fff", accent: "#ffe58a", likes: 4102 },
+  { hook: "Jelly's worst enemy.", fact: "Fresh kiwifruit contains actinidin, an enzyme that breaks down protein. Add it to gelatin dessert and the jelly won't set.", art: jelly, bg: "#e44d7a", fg: "#fff", accent: "#a6d94d", likes: 5568 },
+  { hook: "Vines have genders.", fact: "Kiwifruit vines are either male or female. Only the females grow fruit, and they need a male vine nearby for pollination.", art: vines, bg: "#183d2a", fg: "#fff", accent: "#a6d94d", likes: 1873 },
+  { hook: "You might be a kiwi.", fact: "People from New Zealand are nicknamed Kiwis after the bird. The name caught on widely during the First World War.", art: flag, bg: "#0f1b2d", fg: "#fff", accent: "#d9c9a0", likes: 6044 },
+  { hook: "Still in trouble.", fact: "Fewer than 70,000 wild kiwi remain. Stoats, cats and dogs are major threats, and predator control is helping some populations recover.", art: shield, bg: "#3a5a40", fg: "#fff", accent: "#ffe27a", likes: 9317 }
+];
+
+/* ---------- Made-up clips, mixed in between the facts ---------- */
+var clips = [
+  { clip: true, hook: "Kiwi attempts flight", fact: "Day 4,000. He's convinced it's a mindset issue.", art: clipFly, bg: "#b5e1ff", fg: "#0b2540", accent: "#fff", likes: 12400 },
+  { clip: true, hook: "Breakfast, but aggressive", fact: "The worm thought it was hidden. The kiwi smelled it from the end of its beak.", art: clipWorm, bg: "#4b8f3a", fg: "#fff", accent: "#ff9aa8", likes: 9830 },
+  { clip: true, hook: "Do not text a kiwi at 2pm", fact: "Nocturnal bird, daytime alarm. This is how wars start.", art: clipSleep, bg: "#2a2150", fg: "#fff", accent: "#f6efc4", likes: 15210 },
+  { clip: true, hook: "Birthday boy", fact: "Turned one today. Still hasn't flown. Zero regrets.", art: clipHat, bg: "#ffb3c7", fg: "#3a0f1f", accent: "#ff4d6d", likes: 8120 },
+  { clip: true, hook: "Wing day", fact: "His wings are a few centimetres long. He's still doing three sets of twelve.", art: clipGym, bg: "#1d1d1d", fg: "#fff", accent: "#ff4d6d", likes: 21050 },
+  { clip: true, hook: "Kiwi meets kiwifruit", fact: "The fruit was named after the bird. Nobody told the fruit to be nice about it.", art: clipMeet, bg: "#c7f09a", fg: "#10200a", accent: "#6fb12f", likes: 17760 }
+];
+(function () {
+  var facts = shorts, fi = 0, ci = 0;
+  shorts = [];
+  while (fi < facts.length || ci < clips.length) {
+    for (var k = 0; k < 2 && fi < facts.length; k++) shorts.push(facts[fi++]);
+    if (ci < clips.length) shorts.push(clips[ci++]);
+  }
+})();
+
+/* ---------- Build ---------- */
+var feed = document.getElementById("feed");
+var liked = {};
+function fmt(n) { return n >= 1000 ? (n / 1000).toFixed(1).replace(".0", "") + "K" : String(n); }
+
+shorts.forEach(function (s, i) {
+  var c = document.createElement("section");
+  c.className = "card" + (i === 0 ? " first" : "");
+  c.style.setProperty("--bg", s.bg); c.style.setProperty("--fg", s.fg); c.style.setProperty("--accent", s.accent);
+  c.innerHTML =
+    '<div class="art">' + s.art() + '</div>' +
+    '<div class="hint">Swipe up for the next fact</div>' +
+    '<div class="copy"><span class="tag"></span><h2 class="hook"></h2><p class="fact"></p><div class="by"><i></i><span class="handle"></span></div></div>' +
+    '<div class="rail">' +
+      '<button class="like" aria-label="Like"><span class="ico"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 5 6.4 5c2 0 3.7 1.1 5.6 3.2C13.900 6.100 15.600 5 17.600 5 21 5 23.100 8.400 21.600 11.800 19.500 16.400 12 21 12 21z"/></svg></span><span class="n"></span></button>' +
+      '<button class="share" aria-label="Copy this fact"><span class="ico"><svg viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v14"/></svg></span><span>Share</span></button>' +
+    '</div>';
+  c.querySelector(".hook").textContent = s.hook;
+  c.querySelector(".tag").textContent = s.clip ? "Fake clip, totally made up" : "Real kiwi fact";
+  c.querySelector(".handle").textContent = s.clip ? "@kiwiclips" : "@kiwifacts";
+  c.querySelector(".fact").textContent = s.fact;
+  var likeBtn = c.querySelector(".like"), n = c.querySelector(".n");
+  n.textContent = fmt(s.likes);
+  function toggle() {
+    liked[i] = !liked[i];
+    likeBtn.classList.toggle("liked", liked[i]);
+    n.textContent = fmt(s.likes + (liked[i] ? 1 : 0));
+  }
+  likeBtn.addEventListener("click", toggle);
+  c.addEventListener("dblclick", function () { if (!liked[i]) toggle(); });
+  c.querySelector(".share").addEventListener("click", function () {
+    var text = s.hook + " " + s.fact + " (Kiwi Shorts)";
+    var done = function () { flash("Fact copied"); };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { flash("Couldn't copy"); });
+      else flash("Couldn't copy");
+    } catch (e) { flash("Couldn't copy"); }
+  });
+  feed.appendChild(c);
+});
+
+var toast = document.getElementById("toast"), tt;
+function flash(msg) { toast.textContent = msg; toast.classList.add("show"); clearTimeout(tt); tt = setTimeout(function () { toast.classList.remove("show"); }, 1400); }
+
+/* ---------- Navigation + autoplay ---------- */
+var cards = Array.prototype.slice.call(feed.children);
+var cur = 0, auto = false, start = 0, held = false, DURATION = 9000;
+var prog = document.getElementById("prog"), autoBtn = document.getElementById("autoBtn");
+var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function go(i) {
+  i = Math.max(0, Math.min(cards.length - 1, i));
+  cards[i].scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+}
+function setActive(i) {
+  cur = i;
+  cards.forEach(function (c, k) { c.classList.toggle("on", k === i); });
+  start = performance.now();
+  prog.style.width = "0";
+}
+var io = new IntersectionObserver(function (entries) {
+  entries.forEach(function (e) { if (e.isIntersecting && e.intersectionRatio > 0.6) setActive(cards.indexOf(e.target)); });
+}, { root: feed, threshold: [0.6] });
+cards.forEach(function (c) { io.observe(c); });
+setActive(0);
+
+document.getElementById("up").onclick = function () { go(cur - 1); };
+document.getElementById("down").onclick = function () { go(cur + 1); };
+document.addEventListener("keydown", function (e) {
+  if (e.key === "ArrowDown" || e.key === "j") { e.preventDefault(); go(cur + 1); }
+  if (e.key === "ArrowUp" || e.key === "k") { e.preventDefault(); go(cur - 1); }
+});
+feed.addEventListener("pointerdown", function () { held = true; });
+window.addEventListener("pointerup", function () { if (held) { held = false; start = performance.now() - (parseFloat(prog.style.width) || 0) / 100 * DURATION; } });
+
+autoBtn.addEventListener("click", function () {
+  auto = !auto;
+  autoBtn.textContent = "Autoplay: " + (auto ? "on" : "off");
+  autoBtn.setAttribute("aria-pressed", String(auto));
+  start = performance.now();
+  if (!auto) prog.style.width = "0";
+});
+
+function tick(now) {
+  if (auto && !held && !reduce) {
+    var p = Math.min(1, (now - start) / DURATION);
+    prog.style.width = (p * 100) + "%";
+    if (p >= 1) { if (cur < cards.length - 1) go(cur + 1); else { auto = false; autoBtn.textContent = "Autoplay: off"; prog.style.width = "0"; } start = now + 1200; }
+  }
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
